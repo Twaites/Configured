@@ -1,6 +1,6 @@
 import pgClient from "./database/postgres.js";
 import redisClient from "./cache/redis.js";
-import Ajv from "ajv";
+import Ajv from "ajv/dist/ajv.js";
 
 type ConfigSchema = {
   type: "object";
@@ -35,6 +35,7 @@ class Configured {
       this.db = pgClient;
       this.cache = redisClient;
       this.machineName = machineName;
+      // @ts-expect-error
       this.validator = new Ajv().compile(configSchema);
       this.config = defaultConfig || "";
       this.lastConfiguredId = null;
