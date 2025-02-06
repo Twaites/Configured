@@ -1,5 +1,5 @@
-import pgClient from "./database";
-import redisClient from "./cache";
+import pgClient from "./database/postgres.js";
+import redisClient from "./cache/redis.js";
 import Ajv from "ajv";
 
 type ConfigSchema = {
@@ -109,7 +109,7 @@ class Configured {
           .query(
             "SELECT uuid, config FROM public.configured WHERE deleted = false ORDER BY created_at DESC LIMIT 1"
           )
-          .then(async (res) => {
+          .then(async (res: { rows: { uuid: string; config: string }[] }) => {
             const configs = res.rows.map((row) => {
               return {
                 uuid: row.uuid,

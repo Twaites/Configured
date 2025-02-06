@@ -1,4 +1,4 @@
-import { Configured } from "./configured";
+import { Configured } from "./configured.js";
 
 const configured = new Configured("alpha", {
   type: "object",
