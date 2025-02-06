@@ -1,0 +1,25 @@
+{
+  "name": "configured",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Configured synchronizes configurations across server clusters using server polling to ensure consistency and reliability.",
+  "main": "configured.js",
+  "scripts": {
+    "start": "tsx test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/Twaites/Configured"
+  },
+  "author": "Kory Twaites",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ioredis": "^5.4.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.11",
+    "tsx": "^4.19.2"
+  }
+}
