@@ -1,15 +1,11 @@
-import pgClient from "./database/postgres.js";
+import { ConfigSchema } from './types.js';
+import pgClient from "./database/postgresql.js";
 import redisClient from "./cache/redis.js";
-import Ajv from "ajv/dist/ajv.js";
+import Ajv from "ajv";
 
-type ConfigSchema = {
-  type: "object";
-  properties: Record<string, unknown>;
-  required?: string[];
-  additionalProperties?: boolean;
-};
+const ajv = new (Ajv as any)();
 
-class Configured {
+export class Configured {
   private readonly db: typeof pgClient;
   private cache: typeof redisClient;
   private machineName: string;
@@ -150,5 +146,3 @@ class Configured {
     }
   }
 }
-
-export { Configured };
