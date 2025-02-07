@@ -5,7 +5,10 @@ if (!process.env.REDIS_URL) {
   throw new Error("REDIS_URL is not set");
 }
 
-const redisClient = new Redis(process.env.REDIS_URL as string);
+const redisURL = process.env.REDIS_URL as string;
+const redisOptions = redisURL.includes("upstash") ? { family: 6 } : {};
+
+const redisClient = new Redis(redisURL, redisOptions);
 
 redisClient.on("error", (err) => {
   console.error("Redis error: ", err);

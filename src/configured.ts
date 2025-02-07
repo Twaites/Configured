@@ -3,8 +3,6 @@ import pgClient from "./database/postgresql.js";
 import redisClient from "./cache/redis.js";
 import Ajv from "ajv";
 
-const ajv = new (Ajv as any)();
-
 export class Configured {
   private readonly db: typeof pgClient;
   private cache: typeof redisClient;
