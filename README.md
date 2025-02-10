@@ -14,7 +14,7 @@ Installation
 
 Install the package via npm:
 
-    npm install github:twaites/Configured#main
+    npm install github:twaites/Configured
 
 Prerequisites
 -------------
