@@ -1,2 +1,5 @@
 export { Configured } from './configured.js';
-export type { ConfigSchema } from './types.js'; 
+export type { 
+  ConfigSchema,
+  ConfiguredOptions
+} from './types.js'; 

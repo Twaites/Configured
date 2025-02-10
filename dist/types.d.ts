@@ -4,3 +4,10 @@ export type ConfigSchema = {
     required?: string[];
     additionalProperties?: boolean;
 };
+export interface ConfiguredOptions {
+    workerIntervalMinutes?: number;
+    redisExpirationSeconds?: number;
+    schema?: string;
+    tableName?: string;
+}
+export declare const DEFAULT_OPTIONS: ConfiguredOptions;

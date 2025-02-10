@@ -1,4 +1,4 @@
-import { ConfigSchema } from './types.js';
+import { ConfigSchema, ConfiguredOptions } from './types.js';
 import pgClient from "./database/postgresql.js";
 import redisClient from "./cache/redis.js";
 import Ajv from "ajv";
@@ -10,10 +10,12 @@ export class Configured {
   private validator: any;
   private config: string;
   private lastConfiguredId: string | null;
+  private options: ConfiguredOptions;
 
   constructor(
     machineName: string,
     configSchema: ConfigSchema,
+    options?: ConfiguredOptions,
     defaultConfig?: string
   ) {
     try {
@@ -29,6 +31,7 @@ export class Configured {
       this.db = pgClient;
       this.cache = redisClient;
       this.machineName = machineName;
+      this.options = options || {};
       // @ts-expect-error
       this.validator = new Ajv().compile(configSchema);
       this.config = defaultConfig || "";
@@ -39,7 +42,7 @@ export class Configured {
     }
   }
 
-  async init() {
+  public async init() {
     console.log(`Configured initialized for: ${this.machineName}`);
     await this.validateDb();
     await this.worker(); // Run immediately on init
@@ -50,17 +53,55 @@ export class Configured {
     return this.config;
   }
 
-  set(config: string) {
-    const validConfig = this.validator(config);
-    if (!validConfig) {
-      console.error(`Invalid config: ${this.machineName}`);
-      console.error(this.validator.errors);
+  public async set(config: string) {
+    try {
+      // Validate the config against schema
+      const validConfig = this.validator(config);
+      if (!validConfig) {
+        console.error(`Invalid config: ${this.machineName}`);
+        console.error(this.validator.errors);
+        return false;
+      }
 
-      return;
+      // Get schema and table name from options or defaults
+      const schema = this.options.schema || 'public';
+      const tableName = this.options.tableName || 'configured';
+
+      // Insert new config into database
+      const result = await this.db.query(
+        `INSERT INTO ${schema}.${tableName} 
+         (machine_name, config) 
+         VALUES ($1, $2) 
+         RETURNING uuid`,
+        [this.machineName, config]
+      );
+
+      const uuid = result.rows[0].uuid;
+
+      // Update Redis cache
+      await this.cache.set(
+        "last_configured",
+        uuid,
+        "EX",
+        this.options.redisExpirationSeconds || 300
+      );
+
+      await this.cache.set(
+        "configured",
+        config
+      );
+
+      // Update local state
+      this.lastConfiguredId = uuid;
+      this.config = config;
+
+      return true;
+    } catch (error) {
+      console.error('Failed to set configuration:', error);
+      return false;
     }
-
-    this.config = config;
   }
+
   private async validateDb() {
     try {
       // Check if table exists
@@ -97,12 +138,12 @@ export class Configured {
 
   private async worker() {
     try {
+      const { schema, tableName, redisExpirationSeconds } = this.options;
       let lcId = await this.cache.get("last_configured");
       if (lcId === null) {
-        // console.log("Redis is empty, fetching new config...");
         await this.db
           .query(
-            "SELECT uuid, config FROM public.configured WHERE deleted = false ORDER BY created_at DESC LIMIT 1"
+            `SELECT uuid, config FROM ${schema}.${tableName} WHERE deleted = false ORDER BY created_at DESC LIMIT 1`
           )
           .then(async (res: { rows: { uuid: string; config: string }[] }) => {
             const configs = res.rows.map((row) => {
@@ -122,7 +163,7 @@ export class Configured {
               "last_configured",
               configs[0].uuid,
               "EX",
-              300
+              redisExpirationSeconds || 300
             );
 
             await this.cache.set(
@@ -134,7 +175,6 @@ export class Configured {
       }
 
       if (lcId !== this.lastConfiguredId) {
-        // console.log("Local config is outdated, fetching new config...");
         this.lastConfiguredId = await this.cache.get("last_configured");
         this.config = (await this.cache.get("configured")) || "";
       }

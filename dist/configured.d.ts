@@ -1,4 +1,4 @@
-import { ConfigSchema } from './types.js';
+import { ConfigSchema, ConfiguredOptions } from './types.js';
 export declare class Configured {
     private readonly db;
     private cache;
@@ -6,10 +6,11 @@ export declare class Configured {
     private validator;
     private config;
     private lastConfiguredId;
-    constructor(machineName: string, configSchema: ConfigSchema, defaultConfig?: string);
+    private options;
+    constructor(machineName: string, configSchema: ConfigSchema, options?: ConfiguredOptions, defaultConfig?: string);
     init(): Promise<void>;
     get(): string;
-    set(config: string): void;
+    set(config: string): Promise<boolean>;
     private validateDb;
     private worker;
 }

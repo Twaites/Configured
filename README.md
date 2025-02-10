@@ -14,13 +14,16 @@ Installation
 
 Install the package via npm:
 
-    npm install configured
+    npm install github:twaites/Configured#main
 
 Prerequisites
 -------------
 
 *   **PostgreSQL**: Ensure you have a PostgreSQL database available.
 *   **Redis**: A Redis instance is required for caching and synchronization.
+
+I'm using Upstash for Redis.
+I'm using Supabase for PostgreSQL.
 
 ### Environment Setup (.env) or Environment Variables
 
@@ -49,6 +52,7 @@ Below is an example of how to use the `Configured` module:
     const configured = new Configured(
       machineName: string,
       configSchema: ConfigSchema,
+      options?: ConfiguredOptions,
       defaultConfig?: string
     )
     
@@ -70,6 +74,7 @@ API Reference
     new Configured(
       machineName: string,
       configSchema: ConfigSchema,
+      options?: ConfiguredOptions,
       defaultConfig?: string
     )
     
@@ -78,6 +83,11 @@ API Reference
 
 *   `machineName`: A unique identifier for your service instance.
 *   `configSchema`: A JSON Schema object used to validate configurations.
+*   `options`: Optional configuration settings:
+  - `workerIntervalMinutes`: How often to check for updates (default: 2)
+  - `redisExpirationSeconds`: Redis cache TTL (default: 300)
+  - `schema`: Database schema name (default: 'public')
+  - `tableName`: Database table name (default: 'configured')
 *   `defaultConfig` (optional): A JSON string representing the initial configuration.
 
 ### Methods
