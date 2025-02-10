@@ -22,8 +22,7 @@ Prerequisites
 *   **PostgreSQL**: Ensure you have a PostgreSQL database available.
 *   **Redis**: A Redis instance is required for caching and synchronization.
 
-I'm using Upstash for Redis.
-I'm using Supabase for PostgreSQL.
+I'm using Supabase for PostgreSQL and Upstash for Redis.
 
 ### Environment Setup (.env) or Environment Variables
 
